@@ -9,11 +9,11 @@ from detectron2.engine import DefaultPredictor
 app = Flask(__name__)
 
 @app.route("/")
-def hello_world():
+def compute():
     # Path to site folder and orthomosaic
-    site_path = "./detectree2"
-    img_path = site_path + "/INSERT_IMAGE_PATH_HERE.tif"
-    tiles_path = site_path + "/tilespred/"
+    site_path = "./detectree2/"
+    img_path = site_path + "/tilespred/Harapan_RGBMS_HST17_20230612_320121_9744381_100_0_32748.tif"
+    tiles_path = site_path + "tilespred/"
 
     # Specify tiling
     buffer = 30
@@ -23,7 +23,8 @@ def hello_world():
 
     trained_model = "./230103_randresize_full.pth"
     cfg = setup_cfg(update_model=trained_model)
-    predict_on_data(tiles_path, predictor=DefaultPredictor(cfg))
+    cfg.MODEL.DEVICE = 'cpu'
+    predict_on_data(tiles_path, tiles_path + "predictions/", predictor=DefaultPredictor(cfg))
 
     project_to_geojson(tiles_path, tiles_path + "predictions/", tiles_path + "predictions_geo/")
 
@@ -36,4 +37,4 @@ def hello_world():
 
     clean.to_file(site_path + "/crowns_out.gpkg")
 
-    return "hello world"
+    return "Success", 200
