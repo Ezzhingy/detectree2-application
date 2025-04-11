@@ -12,7 +12,7 @@ export function useImageLoading(): UseImageLoadingResult {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [fileName, setFileName] = useState<string | null>(null);
-  const [progressInterval, setProgressInterval] = useState<NodeJS.Timeout | null>(null);
+  const [progressInterval, setProgressInterval] = useState<number | null>(null);
 
   useEffect(() => {
     return () => {
