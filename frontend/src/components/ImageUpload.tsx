@@ -70,8 +70,9 @@ export function ImageUpload({ onImageSelect }: ImageUploadProps) {
         {isLoading ? (
           <LoadingState fileName={fileName || ''} progress={loadingProgress} />
         ) : previewUrl ? (
+          <div className="flex flex-col">
           <div className="relative w-full h-full flex items-center justify-center">
-            <div className="relative max-w-full max-h-[450px] w-auto h-auto">
+            <div className="relative max-w-full max-h-[450px] min-w-full min-h-[200px] w-auto h-auto">
               <img 
                 src={previewUrl} 
                 alt="Selected preview" 
@@ -89,6 +90,8 @@ export function ImageUpload({ onImageSelect }: ImageUploadProps) {
                 </svg>
               </button>
             </div>
+          </div>
+          <h3 className="text-gray-700">Upload Successful</h3>
           </div>
         ) : (
           <>
