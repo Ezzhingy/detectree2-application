@@ -140,3 +140,6 @@ def download_file(file_type):
         return send_file("./detectree2/crowns_out.gpkg", mimetype="application/geopackage+sqlite3", as_attachment=True, download_name="crowns_out.gpkg")
     else:
         return {"error": "Invalid file type"}, 400
+
+if __name__ == "__main__":
+    app.run(debug=True)

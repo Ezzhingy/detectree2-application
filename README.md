@@ -6,6 +6,7 @@ You must download a pre-trained model from the model_garden to run this applicat
 
 ```bash
 wget https://zenodo.org/records/10522461/files/230103_randresize_full.pth
+wget https://zenodo.org/records/10522461/files/urban_trees_Cambridge_20230630.pth
 ```
 
 Also, make sure to have the following installed:
@@ -21,7 +22,7 @@ Also, make sure to have the following installed:
 If this is your first time running the app, set up a virtual environment:
 
 ```bash
-python -m venv /path/to/new/virtual/environment
+python -m venv venv
 ```
 
 Then activate your virtual environment:
@@ -34,14 +35,18 @@ If this is your first time running the app, install the required dependencies us
 
 ```bash
 pip install torch torchvision torchaudio
-pip install Flask python-dotenv flask-cors
+pip install Flask python-dotenv flask-cors opencv-python
 pip install git+https://github.com/PatBall1/detectree2.git
+
+pip uninstall rasterio numpy -y
+pip install numpy
+pip install rasterio
 ```
 
 Then to start the server:
 
 ```bash
-flask run
+python3 app.py
 ```
 
 ### Running the frontend
