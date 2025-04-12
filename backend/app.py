@@ -46,16 +46,16 @@ def compute():
     # Image.fromarray(img_array).save(img_io, format='TIFF')
     # img_io.seek(0)
 
-    temp_path = f"/tmp/{file.filename}"
-    file.save(temp_path)
-
-    with rasterio.open(temp_path) as src:
-        file_path = src.name
-
     ### Model prediction
     # Path to site folder and orthomosaic
     site_path = "./detectree2/"
     tiles_path = site_path + "tilespred/"
+
+    temp_path = tiles_path + file.filename
+    file.save(temp_path)
+
+    with rasterio.open(temp_path) as src:
+        file_path = src.name
 
     # Specify tiling
     buffer = 30
@@ -116,14 +116,14 @@ def compute():
     ax.set_yticks([])
     ax.set_frame_on(False)
 
-    plt.savefig('./crowns_out.png', dpi=300, bbox_inches="tight", pad_inches=0)
+    plt.savefig('./detectree2/crowns_out.png', dpi=300, bbox_inches="tight", pad_inches=0)
 
     # Get total tree count
     total_trees = {"total_trees": len(gdf)}
     print(total_trees)
 
     # Read and encode the image
-    with open('./crowns_out.png', 'rb') as img_file:
+    with open('./detectree2/crowns_out.png', 'rb') as img_file:
         img_base64 = base64.b64encode(img_file.read()).decode('utf-8')
 
     # Return both the image and total tree count
@@ -135,7 +135,7 @@ def compute():
 @app.route("/download/<file_type>", methods=["GET"])
 def download_file(file_type):
     if file_type == "png":
-        return send_file("./crowns_out.png", mimetype="image/png", as_attachment=True, download_name="result.png")
+        return send_file("./detectree2/crowns_out.png", mimetype="image/png", as_attachment=True, download_name="result.png")
     elif file_type == "gpkg":
         return send_file("./detectree2/crowns_out.gpkg", mimetype="application/geopackage+sqlite3", as_attachment=True, download_name="crowns_out.gpkg")
     else:
