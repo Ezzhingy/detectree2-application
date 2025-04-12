@@ -7,3 +7,4 @@
 /detectree2/tilespred/*
 /detectree2/crowns_out.gpkg
 /detectree2/crowns_out.png
+/train_outputs
