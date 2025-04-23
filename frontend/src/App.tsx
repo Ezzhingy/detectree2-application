@@ -41,10 +41,13 @@ function App() {
     formData.append("confidence", confidence.toString());
 
     try {
-      const response = await fetch("http://3.145.169.34:5000/", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        "https://cors-anywhere.herokuapp.com/http://18.221.105.38:5000/",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to upload image");
@@ -72,7 +75,7 @@ function App() {
   const handleDownload = async (fileType: "png" | "gpkg") => {
     try {
       const response = await fetch(
-        `http://3.145.169.34:5000/download/${fileType}`
+        `https://cors-anywhere.herokuapp.com/http://18.221.105.38:5000/download/${fileType}`
       );
       if (!response.ok) {
         throw new Error(`Failed to download ${fileType} file`);
