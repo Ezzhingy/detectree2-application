@@ -42,7 +42,7 @@ function App() {
 
     try {
       const response = await fetch(
-        "https://cors-anywhere.herokuapp.com/http://18.221.105.38:5000/",
+        "https://cors-anywhere.herokuapp.com/http://18.219.246.222:5000/",
         {
           method: "POST",
           body: formData,
@@ -75,7 +75,7 @@ function App() {
   const handleDownload = async (fileType: "png" | "gpkg") => {
     try {
       const response = await fetch(
-        `https://cors-anywhere.herokuapp.com/http://18.221.105.38:5000/download/${fileType}`
+        `https://cors-anywhere.herokuapp.com/http://18.219.246.222:5000/download/${fileType}`
       );
       if (!response.ok) {
         throw new Error(`Failed to download ${fileType} file`);
