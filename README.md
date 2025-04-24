@@ -7,6 +7,7 @@ You must download a pre-trained model from the model_garden to run this applicat
 ```bash
 wget https://zenodo.org/records/10522461/files/230103_randresize_full.pth
 wget https://zenodo.org/records/10522461/files/urban_trees_Cambridge_20230630.pth
+wget https://zenodo.org/records/15014353/files/250312_flexi.pth
 ```
 
 Also, make sure to have the following installed:

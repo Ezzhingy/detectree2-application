@@ -51,5 +51,11 @@ COPY . .
 RUN wget -q \
 -O "/230103_randresize_full.pth" \
 https://zenodo.org/records/10522461/files/230103_randresize_full.pth
+RUN wget -q \
+-O "/urban_trees_Cambridge_20230630.pth" \
+https://zenodo.org/records/10522461/files/urban_trees_Cambridge_20230630.pth
+RUN wget -q \
+-O "/250312_flexi.pth" \
+https://zenodo.org/records/15014353/files/250312_flexi.pth
 
 CMD ["python", "app.py"]
