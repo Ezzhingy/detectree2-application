@@ -71,7 +71,8 @@ If this is your first time using AWS, make sure to create an AWS account and ins
 #### Creating a new security group on Virtual Private Cloud (VPC)
 
 1. Go to the security groups tab on the VPC dashboard
-2. Create a new security group with
+2. Create a new security group with an inbound rule of:
+
    a. IP version: `IPv4`
    b. Protocol: `TCP`
    c. Port range: `5000`
@@ -81,6 +82,7 @@ If this is your first time using AWS, make sure to create an AWS account and ins
 
 1. Go to the IAM dashboard
 2. Create a new user and a new group and grant the group the `AdministratorAccess` permission policy
+3. Also, navigate to the Roles tab and create a new role called `ecsTaskExecutionRole` with the `AmazonECSTaskExecutionRolePolicy` policy
 
 This should now allow you to run the following commands through the AWS CLI.
 
@@ -95,6 +97,12 @@ This should now allow you to run the following commands through the AWS CLI.
 1. Go to the ECS dashboard
 2. Create a cluster
 3. Separately, create a task definition and connect your ECR instance
+
+   a. Allocate `8vCPU` and `40GB` of memory for the task. Feel free to tweak these amounts as necessary
+   b. Set the `ecsTaskExecutionRole` as the task execution role
+   c. Make sure to set two environment variables: `FLASK_APP: app.py` and `FLASK_ENV: production`
+   d. Allocate `40GB` of ephemeral storage for the task. Feel free to tweak these amounts as necessary
+
 4. Within your cluster, create a service and connect your task definition
 
 Once the task is running, access the task's public IP to see your backend deployment.
@@ -103,6 +111,7 @@ Once the task is running, access the task's public IP to see your backend deploy
 
 1. Import an existing project from GitHub (detectree2)
 2. For your deploy settings, make sure they are set to the following:
+
    a. Base directory: `frontend`
    b. Build command: `npm run dev`
    c. Publish directory: `frontend/dist`
