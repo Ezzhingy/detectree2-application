@@ -86,13 +86,13 @@ If this is your first time using AWS, make sure to create an AWS account and ins
 
 This should now allow you to run the following commands through the AWS CLI.
 
-#### Create an Amazon Elastic Container Registry (ECR)
+#### Creating an Amazon Elastic Container Registry (ECR)
 
 1. Go to the ECR dashboard
 2. Create a new image and follow the `push commands` to push your docker image to the cloud
 3. NOTE: you must be authenticated with the user you created to be able to push using the AWS CLI
 
-#### Create an Amazon Elastic Container Service (ECS)
+#### Creating an Amazon Elastic Container Service (ECS)
 
 1. Go to the ECS dashboard
 2. Create a cluster
@@ -106,6 +106,56 @@ This should now allow you to run the following commands through the AWS CLI.
 4. Within your cluster, create a service and connect your task definition
 
 Once the task is running, access the task's public IP to see your backend deployment.
+
+#### Creating an Amazon Elastic Compute Cloud (EC2) instance
+
+1. Go to the EC2 dashboard
+2. Create a new EC2 instance
+
+   a. Make sure to check all three rules when creating your new security group
+
+3. After creating the instance, go back to the dashboard and connect
+
+NOTE: The following commands may differ depending on OS. All commands below are run on RHEL
+
+4. Once in the terminal, run `sudo yum install nginx -y`
+5. Run the following commands:
+
+```bash
+sudo systemctl start nginx
+sudo systemctl enable nginx
+```
+
+6. Create your own configuration file:
+
+```bash
+sudo vim /etc/nginx/conf.d/proxy.conf
+```
+
+7. Paste the following:
+
+```vim
+server {
+    listen 80;
+    server_name <EC2_PUBLIC_IP>;
+
+    location / {
+        proxy_pass http://<ECS_PUBLIC_IP>:5000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+8. Reload nginx
+
+```bash
+sudo systemctl reload nginx
+```
+
+All calls to nginx will now be forwarded to the task instance!
 
 #### Hosting the frontend on Netlify
 
@@ -124,7 +174,7 @@ Once the deploy finishes, it will generate a production deploy link.
 
 - Currently, the task IP is being run on `http`, which the `https` frontend cannot hit due to mixed content headers (CORS error)
 - The temporary solution is to use the https://cors-anywhere.herokuapp.com as a proxy, but this proxy requires an activation link which expires every 24 hours
-- A real solution would be to implement your own reverse proxy, which can be done through nginx and https
+- A real solution would be to add https to nginx, which can be done using Certbot
 
 #### Frontend
 
