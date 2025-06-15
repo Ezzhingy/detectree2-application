@@ -32,7 +32,7 @@ export function EnvironmentSelector({
         <Tooltip text="Select the environment type for analysis." />
         <span className="text-black text-lg">Environment Type</span>
         <div className="flex gap-6">
-          <label className="flex items-center gap-3">
+          {/* <label className="flex items-center gap-3">
             <input
               type="radio"
               name="environment"
@@ -41,7 +41,7 @@ export function EnvironmentSelector({
               className="w-5 h-5"
             />
             <span className="text-lg text-gray-500">Default</span>
-          </label>
+          </label> */}
           <label className="flex items-center gap-3">
             <input
               type="radio"
@@ -52,7 +52,7 @@ export function EnvironmentSelector({
             />
             <span className="text-lg text-gray-500">Forest</span>
           </label>
-          <label className="flex items-center gap-3">
+          {/* <label className="flex items-center gap-3">
             <input
               type="radio"
               name="environment"
@@ -61,7 +61,7 @@ export function EnvironmentSelector({
               className="w-5 h-5"
             />
             <span className="text-lg text-gray-500">Urban</span>
-          </label>
+          </label> */}
         </div>
       </div>
 
