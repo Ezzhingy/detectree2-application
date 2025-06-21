@@ -60,10 +60,11 @@ function App() {
     formData.append("environment", environment);
     formData.append("confidence", confidence.toString());
 
-    startUpload(selectedImage);
 
+    startUpload(selectedImage);
+ 
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", "http://localhost:8080/", true);
+    xhr.open("POST", "https://api.detectree2.tech/", true);
 
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable) {
@@ -116,7 +117,7 @@ function App() {
   const handleDownload = async (fileType: "png" | "gpkg") => {
     try {
       const response = await fetch(
-        `http://localhost:8080/download/${fileType}`
+        `https://api.detectree2.tech/download/${fileType}`
       );
       if (!response.ok) {
         throw new Error(`Failed to download ${fileType} file`);

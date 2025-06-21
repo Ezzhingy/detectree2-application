@@ -20,7 +20,10 @@ import base64
 
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173", 'https://detectree2.netlify.app/'])
+CORS(app, resources={r"/*": {"origins": [
+    "http://localhost:5173",
+    "https://detectree2.netlify.app"
+]}})
 
 @app.route("/", methods=["POST"])
 def compute():

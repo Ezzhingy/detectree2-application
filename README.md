@@ -86,26 +86,93 @@ If this is your first time using AWS, make sure to create an AWS account and ins
 
 This should now allow you to run the following commands through the AWS CLI.
 
-#### Create an Amazon Elastic Container Registry (ECR)
+#### Creating an Amazon Elastic Container Registry (ECR)
 
 1. Go to the ECR dashboard
 2. Create a new image and follow the `push commands` to push your docker image to the cloud
 3. NOTE: you must be authenticated with the user you created to be able to push using the AWS CLI
 
-#### Create an Amazon Elastic Container Service (ECS)
+#### Creating an Amazon Elastic Container Service (ECS)
 
 1. Go to the ECS dashboard
 2. Create a cluster
 3. Separately, create a task definition and connect your ECR instance
 
-   a. Allocate `8vCPU` and `40GB` of memory for the task. Feel free to tweak these amounts as necessary
+   a. Allocate `4vCPU` and `30GB` of memory for the task. Feel free to tweak these amounts as necessary
    b. Set the `ecsTaskExecutionRole` as the task execution role
    c. Make sure to set two environment variables: `FLASK_APP: app.py` and `FLASK_ENV: production`
-   d. Allocate `40GB` of ephemeral storage for the task. Feel free to tweak these amounts as necessary
+   d. Allocate `30GB` of ephemeral storage for the task. Feel free to tweak these amounts as necessary
 
 4. Within your cluster, create a service and connect your task definition
 
 Once the task is running, access the task's public IP to see your backend deployment.
+
+#### Creating an Amazon Elastic Compute Cloud (EC2) instance
+
+1. Go to the EC2 dashboard
+2. Create a new EC2 instance
+
+   a. Make sure to check all three rules when creating your new security group
+
+3. After creating the instance, go back to the dashboard and connect
+
+NOTE: The following commands may differ depending on OS. All commands below are run on RHEL
+
+4. Once in the terminal, run
+
+```bash
+sudo yum check-update # refreshes your local package index
+sudo yum install nginx -y
+```
+
+5. Run the following commands:
+
+```bash
+sudo systemctl start nginx
+sudo systemctl enable nginx
+```
+
+6. Create your own configuration file:
+
+```bash
+sudo vim /etc/nginx/conf.d/proxy.conf
+```
+
+7. Paste the following:
+
+```bash
+server {
+    server_name api.detectree2.tech; # api.detectree2.tech to be setup later
+    client_max_body_size 100M; # can be customized, currently set to 100MB
+
+    location / {
+        proxy_pass http://<ECS_PUBLIC_IP>:5000; # points to your ECS instance
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+8. Reload nginx
+
+```bash
+sudo nginx -t # checks your proxy.conf syntax
+sudo systemctl reload nginx # restarts nginx
+```
+
+All calls to nginx will now be forwarded to the task instance!
+
+9. Now add HTTPS by installing the following:
+
+```bash
+sudo yum check-update # refreshes your local package index
+sudo yum install certbot python3-certbot-nginx -y
+sudo certbot --nginx -d api.detectree2.tech # api.detectree2.tech to be setup later
+```
+
+You should now be able to hit https://api.detectree2.tech!
 
 #### Hosting the frontend on Netlify
 
@@ -118,15 +185,25 @@ Once the task is running, access the task's public IP to see your backend deploy
 
 Once the deploy finishes, it will generate a production deploy link.
 
+#### Purchasing a domain for the nginx reverse proxy
+
+1. Go to any domain purchasing service (ie. Namecheap) and buy a domain name
+2. Once bought, add a new `A Record` with the following:
+
+   a. host: `api`
+   b. value: `<EC2_PUBLIC_IP>`
+
+If using Namecheap, refer to [this article](https://www.namecheap.com/support/knowledgebase/article.aspx/9776/2237/how-to-create-a-subdomain-for-my-domain/) for more info.
+
+Wait 5 minutes for changes to propagate and you should be all set!
+
 ### Next Steps
 
-#### Backend
+- Currently only the `Forest` mode is supported. Add support for `Default` and `Urban`
+- A network request takes ~1min to process which is absurdly slow. To boost performance:
 
-- Currently, the task IP is being run on `http`, which the `https` frontend cannot hit due to mixed content headers (CORS error)
-- The temporary solution is to use the https://cors-anywhere.herokuapp.com as a proxy, but this proxy requires an activation link which expires every 24 hours
-- A real solution would be to implement your own reverse proxy, which can be done through nginx and https
+  - Optimize the Dockerfile. Currently installing very heavy GPU dependencies, should be some way of installing CPU-only resources while still being compatible with the detectron2 library
+  - Setup AWS servers in multiple regions. Currently only setup for `eu-west-2`
 
-#### Frontend
-
-- The frontend currently doesn't have it's own domain name
-- Purchase a domain name (ie. from Namecheap) and configure the nameservers/DNS per Netlify's requirements
+- `https://detectree2.netlify.app/` is currently set up on a personal account. This should be migrated over to the organization's Netlify account
+- `https://api.detectree2.tech/` is the domain name for the nginx reverse proxy. The `detectree2.tech` domain name is currently set up on a personal account. This should be migrated over to a domain name owned by the organization
