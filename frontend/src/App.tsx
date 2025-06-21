@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Card } from "./components/Card";
 import { ImageUpload } from "./components/ImageUpload";
 import { EnvironmentSelector } from "./components/EnvironmentSelector";
+import { GitHubIcon } from "./components/GitHubIcon";
+import { useImageLoading } from "./hooks/useImageLoading";
 
 function Title() {
   return (
@@ -22,46 +24,85 @@ function App() {
   const [statistics, setStatistics] = useState<{ total_trees: number } | null>(
     null
   );
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const {
+    isLoading,
+    loadingProgress,
+    fileName,
+    mode,
+    loadingMessage,
+    startLoading,
+    stopLoading,
+    startUpload,
+    updateProgress,
+    startProcessing,
+    stopProcessing,
+    reset: resetLoadingState,
+  } = useImageLoading();
 
   const resetImage = () => {
     setSelectedImage(null);
     setPreview(null);
     setAnalysisComplete(false);
     setStatistics(null);
+    setErrorMessage(null);
+    resetLoadingState();
   };
 
   const uploadImage = async () => {
-    if (!selectedImage) {
-      return;
-    }
+    if (!selectedImage) return;
+
+    setErrorMessage(null); // Clear previous errors
 
     const formData = new FormData();
     formData.append("file", selectedImage);
     formData.append("environment", environment);
     formData.append("confidence", confidence.toString());
 
-    try {
-      const response = await fetch(
-        "https://cors-anywhere.herokuapp.com/http://18.219.246.222:5000/",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+    startUpload(selectedImage);
 
-      if (!response.ok) {
-        throw new Error("Failed to upload image");
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "http://localhost:8080/", true);
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percent = Math.round((event.loaded / event.total) * 100);
+        updateProgress(percent);
       }
+    };
 
-      const data = await response.json();
-      console.log("Received data:", data);
-      setPreview(data.image);
-      setStatistics(data.statistics);
-      console.log("Updated statistics:", data.statistics);
-      setAnalysisComplete(true);
-    } catch (error) {
-      console.error("Error uploading image:", error);
-    }
+    xhr.upload.onload = () => {
+      startProcessing(selectedImage);
+    };
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const data = JSON.parse(xhr.responseText);
+          stopProcessing(); // Stop processing when we get the result
+          setPreview(data.image);
+          setStatistics(data.statistics);
+          setAnalysisComplete(true);
+        } catch (e) {
+          stopProcessing(); // Stop processing on error
+          setErrorMessage("Failed to parse server response. Please try again.");
+          console.error("Failed to parse response:", e);
+        }
+      } else {
+        stopProcessing(); // Stop processing on error
+        setErrorMessage("Analysis failed (server error). Please try again.");
+        console.error("Failed to upload image", xhr.statusText);
+      }
+    };
+
+    xhr.onerror = () => {
+      stopProcessing(); // Stop processing on error
+      setErrorMessage("Network error during analysis. Please try again.");
+      console.error("Error uploading image");
+    };
+
+    xhr.send(formData);
   };
 
   const handleEnvironmentConfigChange = (config: {
@@ -75,7 +116,7 @@ function App() {
   const handleDownload = async (fileType: "png" | "gpkg") => {
     try {
       const response = await fetch(
-        `https://cors-anywhere.herokuapp.com/http://18.219.246.222:5000/download/${fileType}`
+        `http://localhost:8080/download/${fileType}`
       );
       if (!response.ok) {
         throw new Error(`Failed to download ${fileType} file`);
@@ -99,6 +140,48 @@ function App() {
     <div className="min-h-screen bg-green-100 p-8">
       <Title />
 
+      {/* Error message display */}
+      {errorMessage && (
+        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-lg text-center">
+          {errorMessage}
+        </div>
+      )}
+
+      {/* Upload and Processing progress modal */}
+      {isLoading && (mode === "upload" || mode === "processing") && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
+          <div className="bg-white p-8 rounded-lg shadow-lg flex flex-col items-center">
+            <svg className="animate-spin h-8 w-8 text-blue-600 mb-4" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+            </svg>
+            <p className="text-lg text-gray-700 mb-2">{loadingMessage}</p>
+            {mode === "upload" && (
+              <>
+                <div className="w-64 bg-gray-200 rounded-full h-4">
+                  <div
+                    className="bg-blue-500 h-4 rounded-full transition-all"
+                    style={{ width: `${loadingProgress}%` }}
+                  />
+                </div>
+                <p className="text-sm text-gray-500 mt-2">{loadingProgress}%</p>
+              </>
+            )}
+            {mode === "processing" && (
+              <>
+                <div className="w-64 bg-gray-200 rounded-full h-4">
+                  <div
+                    className="bg-green-500 h-4 rounded-full transition-all"
+                    style={{ width: `${loadingProgress}%` }}
+                  />
+                </div>
+                <p className="text-sm text-gray-500 mt-2">Processing... {Math.round(loadingProgress)}%</p>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="container mx-auto flex justify-center items-center">
         <Card>
           <div className="relative flex flex-col items-center">
@@ -114,10 +197,12 @@ function App() {
                       />
                       <button
                         onClick={resetImage}
-                        className="absolute top-4 right-4 w-10 h-10 bg-gray-800 bg-opacity-50 hover:bg-opacity-70 text-white rounded-full flex items-center justify-center transition-all text-2xl"
+                        className="absolute top-2 right-2 z-10 p-2 rounded-full bg-black bg-opacity-60 hover:bg-opacity-80 transition-all"
                         aria-label="Reset image"
                       >
-                        ×
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                       </button>
                     </div>
                     {statistics && (
@@ -187,7 +272,11 @@ function App() {
                 </div>
               </>
             ) : (
-              <ImageUpload onImageSelect={setSelectedImage} />
+              <ImageUpload
+                onImageSelect={setSelectedImage}
+                onReset={resetImage}
+                hasFile={!!selectedImage}
+              />
             )}
           </div>
 
@@ -200,7 +289,7 @@ function App() {
               />
             </div>
             <button
-              className="px-8 py-3 bg-green-100 text-gray-600 rounded-full hover:bg-green-200 transition-colors text-lg"
+              className="px-8 py-3 bg-green-100 text-gray-600 rounded-full hover:bg-green-200 transition-colors text-lg disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={!selectedImage}
               onClick={uploadImage}
             >
@@ -208,6 +297,17 @@ function App() {
             </button>
           </div>
         </Card>
+      </div>
+      <div className="flex flex-row items-center mt-4 text-center">
+        <a 
+          href="https://github.com/PatBall1/detectree2" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors"
+        >
+          <GitHubIcon />
+          <span>GitHub Repository</span>
+        </a>
       </div>
     </div>
   );
