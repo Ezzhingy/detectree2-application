@@ -16,7 +16,7 @@ function Title() {
 function App() {
   const [environment, setEnvironment] = useState<
     "Default" | "Forest" | "Urban"
-  >("Default");
+  >("Forest");
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [confidence, setConfidence] = useState(0.5);
