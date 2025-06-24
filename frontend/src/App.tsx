@@ -29,11 +29,8 @@ function App() {
   const {
     isLoading,
     loadingProgress,
-    fileName,
     mode,
     loadingMessage,
-    startLoading,
-    stopLoading,
     startUpload,
     updateProgress,
     startProcessing,
@@ -60,9 +57,8 @@ function App() {
     formData.append("environment", environment);
     formData.append("confidence", confidence.toString());
 
-
     startUpload(selectedImage);
- 
+
     const xhr = new XMLHttpRequest();
     xhr.open("POST", "https://api.detectree2.tech/", true);
 
@@ -152,9 +148,24 @@ function App() {
       {isLoading && (mode === "upload" || mode === "processing") && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
           <div className="bg-white p-8 rounded-lg shadow-lg flex flex-col items-center">
-            <svg className="animate-spin h-8 w-8 text-blue-600 mb-4" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+            <svg
+              className="animate-spin h-8 w-8 text-blue-600 mb-4"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+                fill="none"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v8z"
+              />
             </svg>
             <p className="text-lg text-gray-700 mb-2">{loadingMessage}</p>
             {mode === "upload" && (
@@ -176,7 +187,9 @@ function App() {
                     style={{ width: `${loadingProgress}%` }}
                   />
                 </div>
-                <p className="text-sm text-gray-500 mt-2">Processing... {Math.round(loadingProgress)}%</p>
+                <p className="text-sm text-gray-500 mt-2">
+                  Processing... {Math.round(loadingProgress)}%
+                </p>
               </>
             )}
           </div>
@@ -201,8 +214,18 @@ function App() {
                         className="absolute top-2 right-2 z-10 p-2 rounded-full bg-black bg-opacity-60 hover:bg-opacity-80 transition-all"
                         aria-label="Reset image"
                       >
-                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        <svg
+                          className="w-6 h-6 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
                         </svg>
                       </button>
                     </div>
@@ -300,9 +323,9 @@ function App() {
         </Card>
       </div>
       <div className="flex flex-row items-center mt-4 text-center">
-        <a 
-          href="https://github.com/PatBall1/detectree2" 
-          target="_blank" 
+        <a
+          href="https://github.com/PatBall1/detectree2"
+          target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors"
         >

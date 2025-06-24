@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
-export type LoadingMode = 'idle' | 'preview' | 'upload' | 'processing';
+export type LoadingMode = "idle" | "preview" | "upload" | "processing";
 
 interface UseImageLoadingResult {
   isLoading: boolean;
@@ -21,9 +21,9 @@ export function useImageLoading(): UseImageLoadingResult {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [fileName, setFileName] = useState<string | null>(null);
-  const [progressInterval, setProgressInterval] = useState<NodeJS.Timeout | null>(null);
-  const [mode, setMode] = useState<LoadingMode>('idle');
-  const [loadingMessage, setLoadingMessage] = useState('');
+  const [progressInterval, setProgressInterval] = useState<number | null>(null);
+  const [mode, setMode] = useState<LoadingMode>("idle");
+  const [loadingMessage, setLoadingMessage] = useState("");
 
   const reset = () => {
     setIsLoading(false);
@@ -32,8 +32,8 @@ export function useImageLoading(): UseImageLoadingResult {
     if (progressInterval) {
       clearInterval(progressInterval);
     }
-    setMode('idle');
-    setLoadingMessage('');
+    setMode("idle");
+    setLoadingMessage("");
   };
 
   useEffect(() => {
@@ -49,11 +49,11 @@ export function useImageLoading(): UseImageLoadingResult {
     setFileName(file.name);
     setIsLoading(true);
     setLoadingProgress(0);
-    setMode('preview');
-    setLoadingMessage('Loading preview...');
+    setMode("preview");
+    setLoadingMessage("Loading preview...");
 
     const interval = setInterval(() => {
-      setLoadingProgress(prev => {
+      setLoadingProgress((prev) => {
         if (prev >= 70) {
           clearInterval(interval);
           return prev;
@@ -73,8 +73,8 @@ export function useImageLoading(): UseImageLoadingResult {
     setTimeout(() => {
       setIsLoading(false);
       setFileName(null);
-      setMode('idle');
-      setLoadingMessage('');
+      setMode("idle");
+      setLoadingMessage("");
     }, 500);
   };
 
@@ -83,8 +83,8 @@ export function useImageLoading(): UseImageLoadingResult {
     setFileName(file.name);
     setIsLoading(true);
     setLoadingProgress(0);
-    setMode('upload');
-    setLoadingMessage('Uploading image...');
+    setMode("upload");
+    setLoadingMessage("Uploading image...");
   };
 
   const updateProgress = (progress: number) => {
@@ -96,12 +96,12 @@ export function useImageLoading(): UseImageLoadingResult {
     setFileName(file.name);
     setIsLoading(true);
     setLoadingProgress(0);
-    setMode('processing');
-    setLoadingMessage('Processing image (this may take 5-10 minutes)...');
+    setMode("processing");
+    setLoadingMessage("Processing image (this may take 5-10 minutes)...");
 
     // Start a simulated progress for processing (since we don't have real progress)
     const interval = setInterval(() => {
-      setLoadingProgress(prev => {
+      setLoadingProgress((prev) => {
         if (prev >= 90) {
           clearInterval(interval);
           return prev;
@@ -121,8 +121,8 @@ export function useImageLoading(): UseImageLoadingResult {
     setTimeout(() => {
       setIsLoading(false);
       setFileName(null);
-      setMode('idle');
-      setLoadingMessage('');
+      setMode("idle");
+      setLoadingMessage("");
     }, 500);
   };
 
@@ -140,4 +140,4 @@ export function useImageLoading(): UseImageLoadingResult {
     stopProcessing,
     reset,
   };
-} 
+}
